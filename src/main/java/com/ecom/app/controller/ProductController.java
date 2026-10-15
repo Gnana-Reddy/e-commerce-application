@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/products")
@@ -19,7 +21,12 @@ public class ProductController {
 
     @PostMapping
     public ResponseEntity<ProductResponse> createProduct(@RequestBody ProductRequest productRequest){
-            return new ResponseEntity(productService.createProduct(productRequest),HttpStatus.CREATED);
+            return new ResponseEntity<>(productService.createProduct(productRequest),HttpStatus.CREATED);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ProductResponse>> getAllProducts(){
+        return new ResponseEntity<>(productService.getAllProducts(),HttpStatus.OK);
     }
 
     @PutMapping("{id}")
@@ -30,4 +37,14 @@ public class ProductController {
                 .orElseGet(()->ResponseEntity.notFound().build());
     }
 
+    @DeleteMapping("{id}")
+    public ResponseEntity<Void> deleteProduct(@PathVariable Long id){
+        boolean deleted = productService.deleteProduct(id);
+        return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<ProductResponse>> getProducts(@RequestParam String keyword){
+        return new ResponseEntity<>(productService.getProducts(keyword),HttpStatus.OK);
+    }
 }
