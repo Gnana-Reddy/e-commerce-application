@@ -8,7 +8,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +24,20 @@ public class ProductService {
         updateProductFromRequest(product,productRequest);
         Product savedProduct = productRepository.save(product);
         return mapToProductResponse(savedProduct);
+    }
+
+    public List<ProductResponse> getAllProducts(){
+
+        return productRepository.findByActiveTrue().stream().map(this::mapToProductResponse).collect(Collectors.toList());
+    }
+
+    public boolean deleteProduct(long id){
+            return productRepository.findById(id)
+                    .map(product->{
+                        product.setActive(false);
+                        productRepository.save(product);
+                        return true;
+                    }).orElse(false);
     }
 
     public Optional<ProductResponse> updateProduct(Long id, ProductRequest updateProduct){
@@ -57,4 +73,11 @@ public class ProductService {
         return response;
     }
 
+    public List<ProductResponse> getProducts(String keyword){
+
+        return productRepository.searchProducts(keyword)
+                .stream()
+                .map(this :: mapToProductResponse)
+                .collect(Collectors.toList());
+    }
 }
